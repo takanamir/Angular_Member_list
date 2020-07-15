@@ -1,22 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { Member } from './member';
 
-export class Member  {
-  id: number;
-  name: string;
-}
-
-const MEMBERS: Member[] = [
-  { id: 11, name: '武山 岳大' },
-  { id: 12, name: '駒倉 光紀' },
-  { id: 13, name: '長田 研太' },
-  { id: 14, name: '高藤 友梨香' },
-  { id: 15, name: '浜崎 貴之' },
-  { id: 16, name: '緑川 睦' },
-  { id: 17, name: '森谷 怜奈' },
-  { id: 18, name: '大槻 祐大' },
-  { id: 19, name: '岩野 紀之' },
-  { id: 20, name: '佐々木 小次郎' },
-];
+import { MemberService } from './member.service';
 
 @Component({
   selector: 'my-app',
@@ -24,17 +9,13 @@ const MEMBERS: Member[] = [
   <h1>{{title}}</h1>
   <h2>社員一覧</h2>
   <ul class="members">
-    <li *ngFor="let member of members">
+    <li *ngFor="let member of members" (click)="onSelect(member)"
+      [class.selected]="member === selectedMember">
       <span class="badge">{{member.id}}</span> {{member.name}}
     </li>
   </ul>
+  <member-detail [member]="selectedMember"></member-detail>
   `,
-  // <div><label>id: </label>{{member.id}}</div>
-  // <div>
-  //   <label>name: </label>
-  //   <input type="text" [(ngModel)]="member.name" placeholder="名前">
-  // </div>
-  // `,
   styles: [`
     .selected {
       background-color: #CFD8DC !important;
@@ -83,9 +64,27 @@ const MEMBERS: Member[] = [
       margin-right: .8em;
       border-radius: 4px 0 0 4px;
     }
-  `]
+  `],
+  providers: [ MemberService ]
 })
-export class AppComponent  {
+export class AppComponent implements OnInit {
   title = '自社社員名簿';
-  members = MEMBERS;
+  members: Member[];
+  selectedMember: Member;
+
+  // Dependency Injection
+  constructor(private memberService: MemberService) { }
+
+  ngOnInit(): void {
+    // constructorが実行された後、初期化時に呼ばれるコールバック
+    this.getMembers();
+  }
+
+  onSelect(member: Member): void {
+    this.selectedMember = member;
+  }
+
+  getMembers(): void {
+    this.memberService.getMembers().then(members => this.members = members);
+  }
 }
